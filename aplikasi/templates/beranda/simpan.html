@@ -1,0 +1,31 @@
+{% extends "layout/base.html" %} {% block content %} {% for p in baca_json%}
+<div class="col-md-12 mt-2">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text">
+                <span class="d-flex justify-content-center"> {{ forloop.revcounter }} </span>
+                <div>
+                    <span class="text-primary">Headline:</span>
+                    <small>{{ p.headline }}</small>
+                </div>
+                <div>
+                    <span class="text-primary">Date:</span>
+                    <small>{{ p.date }}</small>
+                </div>
+                <div>
+                    <span class="text-primary">Main Headline:</span>
+                    <small>{{ p.main_headline }}</small>
+                </div>
+                <div>
+                    <span class="text-primary">Url:</span>
+                    <small>{{ p.url }}</small>
+                </div>
+                <div>
+                    <span class="text-primary">Content:</span>
+                    <small>{{ p.content }}</small>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+{% endfor %} {% endblock %}
