@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', aplikasi_views.masukkan),
     url(r'^simpan/', aplikasi_views.simpan),
+    url(r'^preproses/', aplikasi_views.preproses),
 ]

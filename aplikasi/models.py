@@ -10,6 +10,8 @@ class CrawlDetikNews(models.Model):
     main_headline = models.TextField(blank=True)
     content = models.TextField(blank=True)
     url = models.TextField(blank=True)
+    stemming = models.TextField(blank=True)
+    stopword = models.TextField(blank=True)
     objects = models.Manager()
 
     def __str__(self):
