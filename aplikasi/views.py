@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 
-import json
+import json,ast
 from aplikasi.models import CrawlDetikNews
 
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
@@ -43,26 +43,54 @@ def simpan(request):
 
     return render(request, 'beranda/simpan.html', {"baca_json": baca_db})
 
+
 def preproses(request):
-    # create stemmer
-    factory = StemmerFactory()
-    stemmer = factory.create_stemmer()
-    # stemming process
-    sentence = 'Surabaya - Dinas Perhubungan (dishub) Surabaya mengimbau pengguna jalan untuk menghindari Jalan Kartini yang ditutup karena jembatannya ambles. Pengguna jalan diimbau untuk mencari jalan lain atau jalan alternatif. \"Kami mengimbau kepada para pengguna jalan agar mencari alternatif jalur lain di saat jam aktif. Dikhawatikan akan terjadi kemacetan,\" kata Kabid Lalu Lintas Dinas Pergubungan Kota Surabaya Rubben Rico kepada detikcom, Senin (12/3/2018).Ruben mengatakan pihaknya sudah melakukan rekayasa pengalihan arus sejak hari Minggu (12/3/2018). \"Kami alihkan yang dari Jalan Darmo bisa melewati WR Supratman atau melewati Jalan rr Soetomo. Sebaliknya dari Banyu Urip atau dari Diponegoro bisa lewat Jalan Padegiling atau lewat dr Soetomo,\" ujar Rubben.Rubben mengatakan penutupan sebagian Jalan Kartini akan berlangsung sekitar 6 hari. \"Kami mendapatkan info dari Dinas PU bahwa jembatan ini akan ditutup selama 6 hari. Karena mereka meminta waktu yang cukup. Sebab salah satu girder Jembatan Kartini ada yang patah. Jadi perlu pemancangan,\" kata Ruben.Dalam pantauan detikcom, perempatan Jalan Kartini yang mengarah ke Jalan Diponegoro ditutup dengan mengunakan barrier. Selain itu, warga yang penasaran berdatangan melihat amblesnya jalan rusak. (iwd/iwd) jembatan kartini ambles pemkot surabaya dinas pu surabaya dishub surabaya'
-    output   = stemmer.stem(sentence)
+    baca_db = CrawlDetikNews.objects.all()
+    kounter = 0
+    for baca in baca_db:
+        kounter += 1
+        if kounter > 325 and kounter <= 475:
+            # create stemmer
+            factory = StemmerFactory()
+            stemmer = factory.create_stemmer()
+            # stemming process
+            sentence = baca.headline +" "+ baca.content
+            output = stemmer.stem(sentence)
+            baca.stemming = output
 
-    # ------------------- Stopword Removal
-    # factory = StopWordRemoverFactory()
-    # stopword = factory.create_stop_word_remover()
-    # Kalimat
-    # kalimat = 'Dengan Menggunakan Python dan Library Sastrawi saya dapat melakukan proses Stopword Removal'
-    # stop = stopword.remove(kalimat)
+            # ------------------- Stopword Removal
+            fa = StopWordRemoverFactory()
+            stopword = fa.create_stop_word_remover()
+            kalimat = output
+            stop = stopword.remove(kalimat)
+            stop = stop.replace(' - ', ' ')
+            output = stop
+            baca.stopword = output
 
-    fa = StopWordRemoverFactory()
-    stopword = fa.create_stop_word_remover()
-    kalimat = output
-    stop = stopword.remove(kalimat)
-    stop = stop.replace(' - ', ' ')
-    output = stop
+            baca.save()
 
-    return render(request, 'beranda/preprocessing.html', {"rootword": output, "ori":sentence})
+    return render(request, 'beranda/preprocessing.html', {"rootword": "output", "ori": sentence})
+
+def hitung_term(request):
+    baca_db = CrawlDetikNews.objects.all()
+    kounter = 0
+    for baca in baca_db:
+        kounter += 1
+        if kounter > 325 and kounter <= 400:
+            counts = dict()
+            # get from db >> stopword
+            str_db = baca.stopword
+            words = str_db.split()
+            for word in words:
+                if word in counts:
+                    counts[word] += 1
+                else:
+                    counts[word] = 1
+            baca.count_term = ast.literal_eval(json.dumps(counts))
+            baca.sum_all_word = len(words)
+            baca.save()
+
+    return render(request, 'beranda/term.html', {'priview':ast.literal_eval(json.dumps(counts))})
+
+def tf_idf(request):
+    return render(request, 'beranda/tf_idf.html')

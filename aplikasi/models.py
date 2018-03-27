@@ -12,6 +12,8 @@ class CrawlDetikNews(models.Model):
     url = models.TextField(blank=True)
     stemming = models.TextField(blank=True)
     stopword = models.TextField(blank=True)
+    sum_all_word = models.TextField(blank=True)
+    count_term = models.TextField(blank=True)
     objects = models.Manager()
 
     def __str__(self):

@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^$', aplikasi_views.masukkan),
     url(r'^simpan/', aplikasi_views.simpan),
     url(r'^preproses/', aplikasi_views.preproses),
+    url(r'^term/', aplikasi_views.hitung_term),
+    url(r'^tf-idf/', aplikasi_views.tf_idf),
 ]
