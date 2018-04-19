@@ -49,7 +49,7 @@ def preproses(request):
     kounter = 0
     for baca in baca_db:
         kounter += 1
-        if kounter > 325 and kounter <= 475:
+        if kounter > 497 and kounter <= 500:
             # create stemmer
             factory = StemmerFactory()
             stemmer = factory.create_stemmer()
@@ -69,14 +69,14 @@ def preproses(request):
 
             baca.save()
 
-    return render(request, 'beranda/preprocessing.html', {"rootword": "output", "ori": sentence})
+    return render(request, 'beranda/preprocessing.html', {"rootword": output, "ori": sentence})
 
 def hitung_term(request):
     baca_db = CrawlDetikNews.objects.all()
     kounter = 0
     for baca in baca_db:
         kounter += 1
-        if kounter > 325 and kounter <= 400:
+        if kounter > 497 and kounter <= 500:
             counts = dict()
             # get from db >> stopword
             str_db = baca.stopword
