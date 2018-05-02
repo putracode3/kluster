@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-import json,ast
-from aplikasi.models import CrawlDetikNews
+import json
+import ast
+from aplikasi.models import CrawlDetikNews, Kelas
+from django.http import HttpResponseRedirect
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
@@ -49,12 +53,12 @@ def preproses(request):
     kounter = 0
     for baca in baca_db:
         kounter += 1
-        if kounter > 497 and kounter <= 500:
+        if kounter > 499 and kounter <= 500:
             # create stemmer
             factory = StemmerFactory()
             stemmer = factory.create_stemmer()
             # stemming process
-            sentence = baca.headline +" "+ baca.content
+            sentence = baca.headline + " " + baca.content
             output = stemmer.stem(sentence)
             baca.stemming = output
 
@@ -70,6 +74,7 @@ def preproses(request):
             baca.save()
 
     return render(request, 'beranda/preprocessing.html', {"rootword": output, "ori": sentence})
+
 
 def hitung_term(request):
     baca_db = CrawlDetikNews.objects.all()
@@ -90,7 +95,41 @@ def hitung_term(request):
             baca.sum_all_word = len(words)
             baca.save()
 
-    return render(request, 'beranda/term.html', {'priview':ast.literal_eval(json.dumps(counts))})
+    return render(request, 'beranda/term.html', {'priview': ast.literal_eval(json.dumps(counts))})
 
-def tf_idf(request):
-    return render(request, 'beranda/tf_idf.html')
+
+def manual_class(request):
+    if request.method == 'POST':
+        form_data = request.POST
+
+        kelas_id = '1'
+        if form_data['data_baru'] != '':
+            kelas = Kelas(
+                nama=form_data['data_baru'],
+            )
+            kelas.save()
+            print('simpan baru')
+            kelas_id = kelas.pk
+        else:
+            print('data lama')
+            kelas_id = form_data['data_lama']
+            
+        index_crawl_news = CrawlDetikNews.objects.get(id=form_data['data_id'])
+        index_crawl_news.kelas_id = kelas_id
+        index_crawl_news.save()
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    kelas = Kelas.objects.all().order_by('nama')
+
+    crawls = CrawlDetikNews.objects.all().order_by('-id')
+    paginator = Paginator(crawls, 5)
+    page = request.GET.get('page')
+    try:
+        crawls = paginator.page(page)
+    except PageNotAnInteger:
+        crawls = paginator.page(1)
+    except EmptyPage:
+        crawls = paginator.page(paginator.num_pages)
+    return render(request, 'beranda/manual.html', {'combo': kelas, 'crawl': crawls})
+
+
