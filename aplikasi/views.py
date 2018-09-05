@@ -81,7 +81,7 @@ def hitung_term(request):
     kounter = 0
     for baca in baca_db:
         kounter += 1
-        if kounter > 497 and kounter <= 500:
+        if kounter > 0 and kounter <= 500:
             counts = dict()
             # get from db >> stopword
             str_db = baca.stopword
@@ -92,7 +92,7 @@ def hitung_term(request):
                 else:
                     counts[word] = 1
             baca.count_term = ast.literal_eval(json.dumps(counts))
-            baca.sum_all_word = len(words)
+            baca.sum_all_word = len(counts)
             baca.save()
 
     return render(request, 'beranda/term.html', {'priview': ast.literal_eval(json.dumps(counts))})
